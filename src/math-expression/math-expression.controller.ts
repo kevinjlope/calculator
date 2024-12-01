@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { MathExpressionService } from './math-expression.service';
 import { CreateMathExpressionDto } from './dto/create-math-expression.dto';
 import { UpdateMathExpressionDto } from './dto/update-math-expression.dto';
@@ -23,7 +31,10 @@ export class MathExpressionController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMathExpressionDto: UpdateMathExpressionDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateMathExpressionDto: UpdateMathExpressionDto,
+  ) {
     return this.mathExpressionService.update(+id, updateMathExpressionDto);
   }
 
