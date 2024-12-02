@@ -1,26 +1,75 @@
-import { Injectable } from '@nestjs/common';
-import { CreateMathExpressionDto } from './dto/create-math-expression.dto';
-import { UpdateMathExpressionDto } from './dto/update-math-expression.dto';
-
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { MathOperationsService } from '../utils/math-operations/math-operations.service';
+import { RegexExpressions } from '../utils/regex/regex-expressions';
 @Injectable()
 export class MathExpressionService {
-  create(createMathExpressionDto: CreateMathExpressionDto) {
-    return 'This action adds a new mathExpression';
+  constructor(private readonly mathOperationsService: MathOperationsService) {}
+
+  calculate(expression: string): number {
+    const cleanExpression = expression.replace(
+      RegexExpressions.whitespaceRegex,
+      '',
+    );
+    const resultOfParenthesesCalculation =
+      this.calculateParenthesesOperation(cleanExpression);
+    return this.evaluateExpression(resultOfParenthesesCalculation);
   }
 
-  findAll() {
-    return `This action returns all mathExpression`;
+  private calculateParenthesesOperation(expression: string): string {
+    while (expression.includes('(')) {
+      expression = expression.replace(
+        RegexExpressions.parenthesesPattern,
+        (match) => {
+          const innerExpression = match.slice(1, -1);
+          const result = this.evaluateExpression(innerExpression);
+          return result.toString();
+        },
+      );
+    }
+    return expression;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} mathExpression`;
+  private evaluateExpression(expression: string): number {
+    const numbersWithOperators =
+      expression.match(RegexExpressions.matchNumbersAndOperators) ?? [];
+
+    const arithmeticsOperators = ['*', '/', '+', '-'];
+    const resultExpression = this.processOperation(
+      numbersWithOperators,
+      arithmeticsOperators,
+    );
+
+    if (resultExpression.length !== 1) {
+      throw new BadRequestException('Invalid mathematical expression');
+    }
+
+    return parseFloat(resultExpression[0]);
   }
 
-  update(id: number, updateMathExpressionDto: UpdateMathExpressionDto) {
-    return `This action updates a #${id} mathExpression`;
-  }
+  private processOperation(
+    numbersWithOperators: string[],
+    operators: string[],
+  ): string[] {
+    const result: string[] = [];
+    let i = 0;
 
-  remove(id: number) {
-    return `This action removes a #${id} mathExpression`;
+    while (i < numbersWithOperators.length) {
+      const token = numbersWithOperators[i];
+
+      if (operators.includes(token)) {
+        const previousResult = parseFloat(result.pop()!);
+        const nextNumber = parseFloat(numbersWithOperators[i + 1]);
+        const operation = this.mathOperationsService.operators[token];
+
+        const evaluatedResult = operation(previousResult, nextNumber);
+        result.push(evaluatedResult.toString());
+        i += 2;
+      } else {
+        result.push(token);
+        i++;
+      }
+    }
+
+    return result;
   }
 }
