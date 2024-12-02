@@ -40,7 +40,7 @@ The application run for default in the port 3000.
 You can use anything client to test the API, postman, thunder client, etc. But this project integrated swagger and if your prefer you can use it.
 In your preferrer browser paste: http://localhost:3000/api .
 
-<img src="https://imgur.com/NzQccJ2" alt="swagger" />
+<img src="https://i.imgur.com/NzQccJ2.png" alt="swagger" />
 
 In case you don't prefer use swagger in your client(postman, thunder client) paste the next url: http://localhost:3000/math-expression, select the method POST and paste the next body:
 
